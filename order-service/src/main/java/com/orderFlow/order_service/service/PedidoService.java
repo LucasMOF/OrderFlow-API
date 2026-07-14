@@ -27,31 +27,62 @@ public class PedidoService {
 
     @Transactional
     public PedidoResponse criarPedido(CriarPedidoRequest request) {
-        Cliente cliente = new Cliente(request.cliente().nome(), request.cliente().email(), request.cliente().cpf());
 
+        Cliente cliente = criarCliente(request.cliente());
+        List<ItemPedido> itens = processarItens(request.itens());
+        BigDecimal valorTotal = calcularValorTotal(itens);
+
+        Pedido pedido = montarPedido(cliente, itens, valorTotal);
+        Pedido salvarPedido = pedidoRepository.save(pedido);
+
+        return converterParaResponse(salvarPedido);
+    }
+
+    private Cliente criarCliente(CriarPedidoRequest.ClienteRequest clienteRequest) {
+        Cliente cliente = new Cliente(
+                clienteRequest.nome(),
+                clienteRequest.email(),
+                clienteRequest.cpf()
+        );
+        return cliente;
+    }
+
+    private List<ItemPedido> processarItens(List<ItemPedidoRequest> itensRequest) {
         List<ItemPedido> itens = new ArrayList<>();
-
-        for (ItemPedidoRequest itemRequest : request.itens()){
+        for (ItemPedidoRequest itemRequest : itensRequest) {
             Produto produto = produtoRepository.findById(itemRequest.produtoId())
                     .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
 
             ItemPedido item = new ItemPedido(null, null, produto, itemRequest.quantidade(), produto.getPreco());
             itens.add(item);
         }
+        return itens;
+    }
+
+    private BigDecimal calcularValorTotal(List<ItemPedido> itens) {
+
         BigDecimal valorTotal = BigDecimal.ZERO;
+        for (ItemPedido item : itens) {
+            valorTotal = valorTotal.add(item.getPrecoUnitario().multiply(BigDecimal.valueOf(item.getQuantidade())));
+        }
+        return valorTotal;
+    }
+
+    private Pedido montarPedido(Cliente cliente, List<ItemPedido> itens, BigDecimal valorTotal) {
         Pedido pedido = new Pedido();
 
         for (ItemPedido item : itens) {
             pedido.adicionarItem(item);
-            valorTotal = valorTotal.add(item.getPrecoUnitario().multiply(BigDecimal.valueOf(item.getQuantidade())));
         }
         pedido.setStatus(StatusPedido.PENDENTE);
         pedido.setCliente(cliente);
         pedido.setValorTotal(valorTotal);
-        Pedido salvarPedido = pedidoRepository.save(pedido);
+        return pedido;
+    }
 
+    private PedidoResponse converterParaResponse(Pedido pedido) {
         List<ItemPedidoResponse> itensResponse = new ArrayList<>();
-        for (ItemPedido item : salvarPedido.getItens()){
+        for (ItemPedido item : pedido.getItens()) {
             ItemPedidoResponse itemPedidoResponse = new ItemPedidoResponse(
                     item.getProduto().getNome(),
                     item.getQuantidade(),
@@ -60,19 +91,21 @@ public class PedidoService {
             itensResponse.add(itemPedidoResponse);
         }
         PedidoResponse.ClienteResponse clienteResponse = new PedidoResponse.ClienteResponse(
-                salvarPedido.getCliente().getNome(),
-                salvarPedido.getCliente().getEmail(),
-                salvarPedido.getCliente().getCpf());
+                pedido.getCliente().getNome(),
+                pedido.getCliente().getEmail(),
+                pedido.getCliente().getCpf());
 
         PedidoResponse response = new PedidoResponse(
-                salvarPedido.getId(),
-                salvarPedido.getStatus(),
-                salvarPedido.getValorTotal(),
+                pedido.getId(),
+                pedido.getStatus(),
+                pedido.getValorTotal(),
                 clienteResponse,
                 itensResponse,
-                salvarPedido.getDataCriacao(),
-                salvarPedido.getDataAtualizacao());
+                pedido.getDataCriacao(),
+                pedido.getDataAtualizacao());
         return response;
-
     }
 }
+
+
+
