@@ -6,10 +6,9 @@ import com.orderFlow.order_service.service.PedidoService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/pedidos")
@@ -25,5 +24,11 @@ public class PedidoController {
     public ResponseEntity<PedidoResponse> criarPedido(@Valid @RequestBody CriarPedidoRequest pedidoRequest) {
         PedidoResponse pedido = pedidoService.criarPedido(pedidoRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(pedido);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<PedidoResponse> buscarPedidoPorId(@PathVariable UUID id) {
+        PedidoResponse pedido = pedidoService.buscarPedidoPorId(id);
+        return ResponseEntity.ok(pedido);
     }
 }

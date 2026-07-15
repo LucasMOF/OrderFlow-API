@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class PedidoService {
@@ -36,6 +37,12 @@ public class PedidoService {
         Pedido salvarPedido = pedidoRepository.save(pedido);
 
         return converterParaResponse(salvarPedido);
+    }
+
+    public PedidoResponse buscarPedidoPorId(UUID id) {
+        Pedido pedido = pedidoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Pedido não encontrado"));
+        return converterParaResponse(pedido);
     }
 
     private Cliente criarCliente(CriarPedidoRequest.ClienteRequest clienteRequest) {
