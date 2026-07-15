@@ -4,6 +4,7 @@ import com.orderFlow.order_service.dto.CriarPedidoRequest;
 import com.orderFlow.order_service.dto.ItemPedidoRequest;
 import com.orderFlow.order_service.dto.ItemPedidoResponse;
 import com.orderFlow.order_service.dto.PedidoResponse;
+import com.orderFlow.order_service.exception.RecursoNaoEncontradoException;
 import com.orderFlow.order_service.model.*;
 import com.orderFlow.order_service.repository.PedidoRepository;
 import com.orderFlow.order_service.repository.ProdutoRepository;
@@ -41,7 +42,7 @@ public class PedidoService {
 
     public PedidoResponse buscarPedidoPorId(UUID id) {
         Pedido pedido = pedidoRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Pedido não encontrado"));
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Pedido não encontrado"));
         return converterParaResponse(pedido);
     }
 
@@ -65,7 +66,7 @@ public class PedidoService {
         List<ItemPedido> itens = new ArrayList<>();
         for (ItemPedidoRequest itemRequest : itensRequest) {
             Produto produto = produtoRepository.findById(itemRequest.produtoId())
-                    .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+                    .orElseThrow(() -> new RecursoNaoEncontradoException("Produto não encontrado"));
 
             ItemPedido item = new ItemPedido(null, null, produto, itemRequest.quantidade(), produto.getPreco());
             itens.add(item);
