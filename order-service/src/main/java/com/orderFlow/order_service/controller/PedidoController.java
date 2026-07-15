@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -30,5 +31,11 @@ public class PedidoController {
     public ResponseEntity<PedidoResponse> buscarPedidoPorId(@PathVariable UUID id) {
         PedidoResponse pedido = pedidoService.buscarPedidoPorId(id);
         return ResponseEntity.ok(pedido);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<PedidoResponse>> listarPedidos() {
+        List<PedidoResponse> pedidos = pedidoService.listarPedidos();
+        return ResponseEntity.ok(pedidos);
     }
 }
