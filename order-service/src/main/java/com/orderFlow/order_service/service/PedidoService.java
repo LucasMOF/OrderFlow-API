@@ -45,6 +45,13 @@ public class PedidoService {
         return converterParaResponse(pedido);
     }
 
+    public List<PedidoResponse> listarPedidos() {
+        List<Pedido> pedidos = pedidoRepository.findAll();
+        return pedidos.stream()
+                .map(this::converterParaResponse)
+                .toList();
+    }
+
     private Cliente criarCliente(CriarPedidoRequest.ClienteRequest clienteRequest) {
         Cliente cliente = new Cliente(
                 clienteRequest.nome(),
