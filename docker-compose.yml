@@ -9,5 +9,17 @@ services:
       - "5432:5432"
     volumes:
       - postgres-order-data:/var/lib/postgresql/data
+
+  rabbitmq:
+    image: rabbitmq:4.3.2-management
+    container_name: orderflow-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: lucas
+      RABBITMQ_DEFAULT_PASS: 1234
+
+
 volumes:
   postgres-order-data:
