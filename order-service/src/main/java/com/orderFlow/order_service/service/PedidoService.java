@@ -5,9 +5,11 @@ import com.orderFlow.order_service.dto.ItemPedidoRequest;
 import com.orderFlow.order_service.dto.ItemPedidoResponse;
 import com.orderFlow.order_service.dto.PedidoResponse;
 import com.orderFlow.order_service.exception.RecursoNaoEncontradoException;
+import com.orderFlow.order_service.messaging.PedidoCriadoEvent;
 import com.orderFlow.order_service.model.*;
 import com.orderFlow.order_service.repository.PedidoRepository;
 import com.orderFlow.order_service.repository.ProdutoRepository;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,10 +23,12 @@ public class PedidoService {
 
     private final PedidoRepository pedidoRepository;
     private final ProdutoRepository produtoRepository;
+    private final RabbitTemplate rabbitTemplate;
 
-    public PedidoService(PedidoRepository pedidoRepository, ProdutoRepository produtoRepository) {
+    public PedidoService(PedidoRepository pedidoRepository, ProdutoRepository produtoRepository, RabbitTemplate rabbitTemplate) {
         this.pedidoRepository = pedidoRepository;
         this.produtoRepository = produtoRepository;
+        this.rabbitTemplate = rabbitTemplate;
     }
 
     @Transactional
@@ -36,8 +40,25 @@ public class PedidoService {
 
         Pedido pedido = montarPedido(cliente, itens, valorTotal);
         Pedido salvarPedido = pedidoRepository.save(pedido);
+        publicarEventoPedidoCriado(salvarPedido);
 
         return converterParaResponse(salvarPedido);
+    }
+
+    private void publicarEventoPedidoCriado(Pedido pedido) {
+
+        PedidoCriadoEvent pedidoCriadoEvent = new PedidoCriadoEvent(
+                pedido.getId(),
+                pedido.getCliente().getNome(),
+                pedido.getCliente().getEmail(),
+                pedido.getValorTotal()
+        );
+
+        rabbitTemplate.convertAndSend(
+                "pedido.criado",
+                "",
+                pedidoCriadoEvent
+        );
     }
 
     public PedidoResponse buscarPedidoPorId(UUID id) {
