@@ -20,6 +20,12 @@ services:
       RABBITMQ_DEFAULT_USER: lucas
       RABBITMQ_DEFAULT_PASS: 1234
 
-
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    container_name: orderflow-mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
 volumes:
   postgres-order-data:
+
