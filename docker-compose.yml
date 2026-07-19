@@ -10,6 +10,18 @@ services:
     volumes:
       - postgres-order-data:/var/lib/postgresql/data
 
+  payment-db:
+    image: mysql:8
+    environment:
+      MYSQL_ROOT_PASSWORD: 12345678
+      MYSQL_DATABASE: paymentdb
+      MYSQL_USER: lucas
+      MYSQL_PASSWORD: 1234
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-payment-data:/var/lib/mysql
+
   rabbitmq:
     image: rabbitmq:4.3.2-management
     container_name: orderflow-rabbitmq
@@ -28,4 +40,6 @@ services:
       - "8025:8025"
 volumes:
   postgres-order-data:
+  mysql-payment-data:
+
 
