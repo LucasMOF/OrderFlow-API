@@ -7,8 +7,12 @@ import com.mercadopago.exceptions.MPApiException;
 import com.mercadopago.exceptions.MPException;
 import com.mercadopago.resources.payment.Payment;
 import com.orderflow.payment_service.messaging.PedidoCriadoEvent;
+import com.orderflow.payment_service.model.Pagamento;
+import com.orderflow.payment_service.model.StatusPagamento;
 import com.orderflow.payment_service.repository.PagamentoRepository;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class PagamentoService {
@@ -19,7 +23,7 @@ public class PagamentoService {
         this.pagamentoRepository = pagamentoRepository;
     }
 
-    public Payment criarPagamentoPix(PedidoCriadoEvent event) {
+    private Payment criarPagamentoPix(PedidoCriadoEvent event) {
         PaymentPayerRequest payer = PaymentPayerRequest.builder()
                 .email(event.emailCliente())
                 .build();
@@ -40,5 +44,23 @@ public class PagamentoService {
         } catch (MPException | MPApiException e) {
             throw new RuntimeException("Erro ao criar pagamento: " + e.getMessage(), e);
         }
+    }
+
+    public void processarPagamentoPix(PedidoCriadoEvent event) {
+        Payment payment = criarPagamentoPix(event);
+
+        String codigoPix = Optional.ofNullable(payment.getPointOfInteraction())
+                .map(pointOfInteraction -> pointOfInteraction.getTransactionData().getQrCode())
+                .orElseThrow(() -> new RuntimeException("Código PIX não retornado pelo Mercado Pago"));
+
+        Pagamento pagamento = new Pagamento(
+                null,
+                event.pedidoId(),
+                StatusPagamento.PENDENTE,
+                event.valorTotal(),
+                payment.getId().toString(),
+                codigoPix
+        );
+        pagamentoRepository.save(pagamento);
     }
 }
