@@ -13,6 +13,7 @@ import com.orderflow.payment_service.repository.PagamentoRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class PagamentoService {
@@ -62,5 +63,18 @@ public class PagamentoService {
                 codigoPix
         );
         pagamentoRepository.save(pagamento);
+    }
+
+    private Payment buscarPagamentoNoMercadoPago(String mercadoPagoId) {
+
+        try {
+            PaymentClient client = new PaymentClient();
+            long id = Long.parseLong(mercadoPagoId);
+            Payment payment = client.get(id);
+            return payment;
+
+        } catch (MPException | MPApiException e) {
+            throw new RuntimeException("Erro ao criar pagamento: " + e.getMessage(), e);
+        }
     }
 }
