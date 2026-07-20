@@ -77,4 +77,31 @@ public class PagamentoService {
             throw new RuntimeException("Erro ao criar pagamento: " + e.getMessage(), e);
         }
     }
+
+    public Payment atualizarStatusPagamento(String mercadoPagoId) {
+
+        Payment payment = buscarPagamentoNoMercadoPago(mercadoPagoId);
+
+        Pagamento pagamento = pagamentoRepository.findByMercadoPagoId(mercadoPagoId)
+                .orElseThrow(() -> new RuntimeException("Erro ao receber id"));
+        System.out.println("Status recebido: " + payment.getStatus());
+
+        String status = payment.getStatus();
+
+        switch (status) {
+            case "pending":
+                pagamento.setStatus(StatusPagamento.PENDENTE);
+                break;
+            case "approved":
+                pagamento.setStatus(StatusPagamento.APROVADO);
+                break;
+            case "rejected":
+                pagamento.setStatus(StatusPagamento.RECUSADO);
+                break;
+            default:
+                throw new IllegalArgumentException("Status de pagamento desconhecido: " + status);
+        }
+        pagamentoRepository.save(pagamento);
+        return payment;
+    }
 }
