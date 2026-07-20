@@ -7,4 +7,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface PagamentoRepository extends JpaRepository<Pagamento, UUID> {
+
+    Optional<Pagamento> findByMercadoPagoId(String mercadoPagoId);
 }
