@@ -84,6 +84,7 @@ public class PagamentoService {
 
         Pagamento pagamento = pagamentoRepository.findByMercadoPagoId(mercadoPagoId)
                 .orElseThrow(() -> new RuntimeException("Erro ao receber id"));
+
         System.out.println("Status recebido: " + payment.getStatus());
 
         String status = payment.getStatus();
