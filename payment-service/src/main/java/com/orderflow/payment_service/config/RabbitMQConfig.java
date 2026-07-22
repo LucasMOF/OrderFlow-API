@@ -25,6 +25,12 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public FanoutExchange pagamentoConfirmadoExchange() {
+        FanoutExchange exchange = new FanoutExchange("pagamento.confirmado");
+        return exchange;
+    }
+
+    @Bean
     public Binding biding(Queue paymentQueue, FanoutExchange pedidoCriadoExchange) {
         return BindingBuilder.bind(paymentQueue).to(pedidoCriadoExchange);
     }
