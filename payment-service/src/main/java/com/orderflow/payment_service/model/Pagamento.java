@@ -21,17 +21,21 @@ public class Pagamento extends EntidadeBase {
     private BigDecimal valor;
     private String mercadoPagoId;
     private String codigoPix;
+    private String nomeCliente;
+    private String emailCliente;
 
     public Pagamento() {
     }
 
-    public Pagamento(UUID id, UUID pedidoId, StatusPagamento status, BigDecimal valor, String mercadoPagoId, String codigoPix) {
+    public Pagamento(UUID id, UUID pedidoId, StatusPagamento status, BigDecimal valor, String mercadoPagoId, String codigoPix, String nomeCliente, String emailCliente) {
         this.id = id;
         this.pedidoId = pedidoId;
         this.status = status;
         this.valor = valor;
         this.mercadoPagoId = mercadoPagoId;
         this.codigoPix = codigoPix;
+        this.nomeCliente = nomeCliente;
+        this.emailCliente = emailCliente;
     }
 
     public UUID getId() {
@@ -80,5 +84,21 @@ public class Pagamento extends EntidadeBase {
 
     public void setCodigoPix(String codigoPix) {
         this.codigoPix = codigoPix;
+    }
+
+    public String getNomeCliente() {
+        return nomeCliente;
+    }
+
+    public void setNomeCliente(String nomeCliente) {
+        this.nomeCliente = nomeCliente;
+    }
+
+    public String getEmailCliente() {
+        return emailCliente;
+    }
+
+    public void setEmailCliente(String emailCliente) {
+        this.emailCliente = emailCliente;
     }
 }
