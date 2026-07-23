@@ -17,6 +17,13 @@ public class RabbitMQConfig {
         Queue queue = new Queue("notification.queue");
         return queue;
     }
+
+    @Bean
+    public Queue paymentConfirmQueue() {
+        Queue queue = new Queue("payment.confirm.queue");
+        return queue;
+    }
+
     @Bean
     public FanoutExchange pedidoCriadoExchange() {
         FanoutExchange exchange = new FanoutExchange("pedido.criado");
@@ -24,8 +31,19 @@ public class RabbitMQConfig {
     }
 
     @Bean
+    public FanoutExchange pagamentoConfirmadoExchange() {
+        FanoutExchange exchange = new FanoutExchange("pagamento.confirmado");
+        return exchange;
+    }
+
+    @Bean
     public Binding biding(Queue notificationQueue, FanoutExchange pedidoCriadoExchange) {
         return BindingBuilder.bind(notificationQueue).to(pedidoCriadoExchange);
+    }
+
+    @Bean
+    public Binding biding2(Queue paymentConfirmQueue, FanoutExchange pagamentoConfirmadoExchange) {
+        return BindingBuilder.bind(paymentConfirmQueue).to(pagamentoConfirmadoExchange);
     }
 
     @Bean
