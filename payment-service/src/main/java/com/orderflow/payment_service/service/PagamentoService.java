@@ -6,10 +6,12 @@ import com.mercadopago.client.payment.PaymentPayerRequest;
 import com.mercadopago.exceptions.MPApiException;
 import com.mercadopago.exceptions.MPException;
 import com.mercadopago.resources.payment.Payment;
+import com.orderflow.payment_service.messaging.PagamentoConfirmadoEvent;
 import com.orderflow.payment_service.messaging.PedidoCriadoEvent;
 import com.orderflow.payment_service.model.Pagamento;
 import com.orderflow.payment_service.model.StatusPagamento;
 import com.orderflow.payment_service.repository.PagamentoRepository;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -20,8 +22,11 @@ public class PagamentoService {
 
     private final PagamentoRepository pagamentoRepository;
 
-    public PagamentoService(PagamentoRepository pagamentoRepository) {
+    private final RabbitTemplate  rabbitTemplate;
+
+    public PagamentoService(PagamentoRepository pagamentoRepository, RabbitTemplate rabbitTemplate) {
         this.pagamentoRepository = pagamentoRepository;
+        this.rabbitTemplate = rabbitTemplate;
     }
 
     private Payment criarPagamentoPix(PedidoCriadoEvent event) {
@@ -105,6 +110,17 @@ public class PagamentoService {
                 throw new IllegalArgumentException("Status de pagamento desconhecido: " + status);
         }
         pagamentoRepository.save(pagamento);
+
+        if (pagamento.getStatus().equals(StatusPagamento.APROVADO)) {
+            PagamentoConfirmadoEvent pagamentoConfirmadoEvent = new PagamentoConfirmadoEvent(
+                    pagamento.getPedidoId(),
+                    pagamento.getNomeCliente(),
+                    pagamento.getEmailCliente(),
+                    pagamento.getValor(),
+                    pagamento.getDataAtualizacao()
+            );
+            rabbitTemplate.convertAndSend("pagamento.confirmado", "", pagamentoConfirmadoEvent);
+        }
         return payment;
     }
 }
