@@ -60,7 +60,9 @@ public class PagamentoService {
                 StatusPagamento.PENDENTE,
                 event.valorTotal(),
                 payment.getId().toString(),
-                codigoPix
+                codigoPix,
+                event.nomeCliente(),
+                event.emailCliente()
         );
         pagamentoRepository.save(pagamento);
     }
