@@ -45,6 +45,16 @@ public class PedidoService {
         return converterParaResponse(salvarPedido);
     }
 
+    public void marcarPedidoComoPago(UUID pedidoId) {
+        Pedido pedido = pedidoRepository.findById(pedidoId)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Pedido não encontrado"));
+
+        if (pedido.getStatus() != StatusPedido.PAGO) {
+            pedido.setStatus(StatusPedido.PAGO);
+            pedidoRepository.save(pedido);
+        }
+    }
+
     private void publicarEventoPedidoCriado(Pedido pedido) {
 
         PedidoCriadoEvent pedidoCriadoEvent = new PedidoCriadoEvent(
