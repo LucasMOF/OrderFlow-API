@@ -22,7 +22,7 @@ public class PagamentoService {
 
     private final PagamentoRepository pagamentoRepository;
 
-    private final RabbitTemplate  rabbitTemplate;
+    private final RabbitTemplate rabbitTemplate;
 
     public PagamentoService(PagamentoRepository pagamentoRepository, RabbitTemplate rabbitTemplate) {
         this.pagamentoRepository = pagamentoRepository;
@@ -47,7 +47,10 @@ public class PagamentoService {
             Payment payment = client.create(paymentCreateRequest);
             System.out.println("Pagamento Criado: " + payment.getId());
             return payment;
-        } catch (MPException | MPApiException e) {
+        } catch (MPApiException e) {
+            System.out.println("Detalhes do erro da API: " + e.getApiResponse().getContent());
+            throw new RuntimeException("Erro ao criar pagamento: " + e.getMessage(), e);
+        } catch (MPException e) {
             throw new RuntimeException("Erro ao criar pagamento: " + e.getMessage(), e);
         }
     }
